@@ -1,8 +1,6 @@
-extern crate env_logger;
-/// Simple WebSocket server with error handling. It is not necessary to setup logging, but doing
-/// so will allow you to see more details about the connection by using the RUST_LOG env variable.
 extern crate ws;
 
+use log;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::{thread, time::Duration};
@@ -40,26 +38,26 @@ impl Handler for Client {
     }
 
     fn on_message(&mut self, msg: Message) -> Result<()> {
-        println!("Got message: {}", msg);
+        log::info!("Got message: {}", msg);
         // self.out.close(CloseCode::Normal)
         return self.out.send(msg);
     }
 
     fn on_close(&mut self, code: CloseCode, reason: &str) {
         match code {
-            CloseCode::Normal => println!(
+            CloseCode::Normal => log::info!(
                 "The client {} is done with the connection.",
                 self.out.connection_id()
             ),
-            CloseCode::Away => println!(
+            CloseCode::Away => log::info!(
                 "The client {} is leaving the site.",
                 self.out.connection_id()
             ),
-            CloseCode::Abnormal => println!(
+            CloseCode::Abnormal => log::error!(
                 "Closing handshake failed! Unable to obtain closing status from client {}.",
                 self.out.connection_id()
             ),
-            _ => println!(
+            _ => log::info!(
                 "The client {} encountered an error: {}",
                 self.out.connection_id(),
                 reason
@@ -69,16 +67,17 @@ impl Handler for Client {
     }
 }
 
-fn main() {
-    env_logger::init();
-    let held_clients = Rc::new(Cell::new(0));
+pub fn setup() {
+    thread::spawn(|| {
+        let held_clients = Rc::new(Cell::new(0));
 
-    // TODO: Client is called per incoming, so shouldn't need to do Rc/Cell
-    // TODO: Can just handle DC inside each client per client
-    if let Err(error) = listen("127.0.0.1:3012", |out| Client {
-        out: out,
-        clients: held_clients.clone(),
-    }) {
-        println!("Failed to create WebSocket due to {:?}", error);
-    }
+        // TODO: Client is called per incoming, so shouldn't need to do Rc/Cell
+        // TODO: Can just handle DC inside each client per client
+        if let Err(error) = listen("127.0.0.1:3012", |out| Client {
+            out: out,
+            clients: held_clients.clone(),
+        }) {
+            log::error!("Failed to create WebSocket due to {:?}", error);
+        }
+    });
 }

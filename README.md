@@ -6,15 +6,26 @@ This is Rust and I have no idea what I'm doing.
 
 ![I have no idea what I'm doing](docs/ihavenoidea.jpg)
 
-## Run
+## Contributing
 
-```rs
-cargo run
+### Clone the repo
+
+```powershell
+git clone https://github.com/maael/dessa
 ```
 
-It will then expose a websocket server on `ws://localhost:3012`, which will emit `{"start": 1}` and then data every 1 second afterwards.
+# Build it
 
-You can use [this](https://www.websocket.org/echo.html) to test it.
+You need a somewhat recent `rust` version. I didn't check the minimum version. dessa is built against the latest `main` channel.
+
+1. Install `rustc`. For example via [rustup](https://rustup.rs/).
+2. Install `cargo`. This is not necessary if you used [rustup](https://rustup.rs/).
+3. Build it:
+```powershell
+cargo build --release
+```
+4. Copy `target\release\dessa.dll` into your bin64 folder of Guild Wars 2:
+5. Start Gw2
 
 ## TODOs
 
