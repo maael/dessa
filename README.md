@@ -6,6 +6,8 @@ This is Rust and I have no idea what I'm doing.
 
 ![I have no idea what I'm doing](docs/ihavenoidea.jpg)
 
+You can use the [websocket echo tool](https://www.websocket.org/echo.html) to test it.
+
 ## Contributing
 
 ### Clone the repo
