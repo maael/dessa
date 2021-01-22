@@ -1,11 +1,15 @@
 use crate::{exports::*, main, release};
 use winapi::shared::{minwindef::LPVOID, ntdef::PCCHAR};
+use std::sync::mpsc::{Sender};
 
-pub fn gen_arcdps() -> LPVOID {
+pub fn gen_arcdps(tx: Sender<String>) -> LPVOID {
+    let i = imgui as arcdps_bindings::SafeImguiCallback;
+    let c = combat(tx.clone());// as arcdps_bindings::SafeCombatCallback;
+    let l = combat_local(tx.clone());//as arcdps_bindings::SafeCombatCallback;
     arcdps_bindings::arcdps_exports::new(0x0002_0804, "BHUDrender", env!("CARGO_PKG_VERSION"))
-        .imgui(imgui as arcdps_bindings::SafeImguiCallback)
-        .combat(combat as arcdps_bindings::SafeCombatCallback)
-        .combat_local(combat_local as arcdps_bindings::SafeCombatCallback)
+        .imgui(i)
+        .combat(c as arcdps_bindings::SafeCombatCallback)
+        .combat_local(l)
         .save() as LPVOID
 }
 

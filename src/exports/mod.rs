@@ -6,5 +6,5 @@ pub fn imgui(_not_charsel_or_loading: bool) {
     // This gets spammed a lot
 }
 
-pub use combat::cbt as combat;
-pub use combat::cbt_local as combat_local;
+pub use combat::wrapped_cbt as combat;
+pub use combat::wrapped_cbt_local as combat_local;

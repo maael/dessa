@@ -1,4 +1,35 @@
 use arcdps_bindings::{cbtevent, Ag, AgOwned};
+use std::sync::mpsc::{Sender};
+use serde_json::json;
+
+use crate::emitter;
+use emitter::EVENT_EMITTER;
+
+pub fn wrapped_cbt(_tx: Sender<String>) -> fn(
+    ev: Option<&cbtevent>,
+    src: Option<&Ag>,
+    dst: Option<&Ag>,
+    skillname: Option<&'static str>,
+    id: u64,
+    revision: u64,
+) -> () {
+    move |ev, src, dst, skillname, id, revision| {
+        cbt(ev, src, dst, skillname, id, revision)
+    }
+}
+
+pub fn wrapped_cbt_local(_tx: Sender<String>) -> fn(
+    ev: Option<&cbtevent>,
+    src: Option<&Ag>,
+    dst: Option<&Ag>,
+    skillname: Option<&'static str>,
+    id: u64,
+    revision: u64,
+) -> () {
+    move |ev, src, dst, skillname, id, revision| {
+        cbt_local(ev, src, dst, skillname, id, revision)
+    }
+}
 
 pub fn cbt(
     ev: Option<&cbtevent>,
@@ -6,7 +37,7 @@ pub fn cbt(
     dst: Option<&Ag>,
     skillname: Option<&'static str>,
     id: u64,
-    revision: u64,
+    revision: u64
 ) {
     spawn_cbt(ev, src, dst, skillname, id, revision, 2);
 }
@@ -17,8 +48,8 @@ pub fn cbt_local(
     dst: Option<&Ag>,
     skillname: Option<&'static str>,
     id: u64,
-    revision: u64,
-) {
+    revision: u64
+) -> () {
     spawn_cbt(ev, src, dst, skillname, id, revision, 3);
 }
 
@@ -31,7 +62,6 @@ fn spawn_cbt(
     revision: u64,
     indicator: u8,
 ) {
-    log::info!("spawn_cbt skill: {:?}", skillname);
     cbt_with_type(
         ev.copied(),
         src.map(|x| (*x).into()),
@@ -65,9 +95,7 @@ fn cbt_with_type(
 ) {
     let mut message = Vec::new();
     message.push(indicator); // indicator for local/area combat message
-    add_bytes(&mut message, ev, src, dst, skillname, id, revision);
-    // TODO: Do something
-    // dispatch(message).await;
+    add_bytes(&mut message, ev, src, dst, skillname, id, revision, indicator);
 }
 
 fn add_bytes(
@@ -78,23 +106,82 @@ fn add_bytes(
     skillname: Option<&str>,
     id: u64,
     revision: u64,
+    indicator: u8,
 ) {
     let mut messages = 0;
     if let Some(ev) = ev {
         messages |= 1;
-        log::info!("get_ev_bytes skill: {:?} {:?} {:?}", ev.src_agent.to_string(), ev.dst_agent.to_string(), skillname);
+        EVENT_EMITTER.lock().unwrap().emit("arc", json!({
+            "type": "arc",
+            "sub_type": "ev_bytes",
+            "indicator": indicator,
+            "skillname": skillname,
+            "id": id,
+            "revision": revision,
+            "src_agent": ev.src_agent.to_string(),
+            "dst_agent": ev.dst_agent.to_string(),
+            "value": ev.value,
+            "buff_dmg": ev.buff_dmg,
+            "overstack_value": ev.overstack_value,
+            "skillid": ev.skillid,
+            "src_instid": ev.src_instid,
+            "dst_instid": ev.dst_instid,
+            "src_master_instid": ev.src_master_instid,
+            "dst_master_instid": ev.dst_master_instid,
+            "iff": ev.iff,
+            "buff": ev.buff,
+            "result": ev.result,
+            "is_activation": ev.is_activation,
+            "is_buffremove": ev.is_buffremove,
+            "is_ninety": ev.is_ninety,
+            "is_fifty": ev.is_fifty,
+            "is_moving": ev.is_moving,
+            "is_statechange": ev.is_statechange,
+            "is_flanking": ev.is_flanking,
+            "is_shields": ev.is_shields,
+            "is_offcycle": ev.is_offcycle,
+            "pad61": ev.pad61,
+            "pad62": ev.pad62,
+            "pad63": ev.pad63,
+            "pad64": ev.pad64,
+        }).to_string());
         let mut bytes = get_ev_bytes(&ev);
         message.append(&mut bytes);
     };
     if let Some(ag) = src {
         messages |= 1 << 1;
-        log::info!("get_ag_bytes src skill: {:?} {:?}", ag.id.to_string(), skillname);
+        EVENT_EMITTER.lock().unwrap().emit("arc", json!({
+            "type": "arc",
+            "sub_type": "ag_bytes",
+            "indicator": indicator,
+            "skillname": skillname,
+            "id": id,
+            "revision": revision,
+            "ag_id": ag.id,
+            "ag_id": ag.id,
+            "prof": ag.prof,
+            "elite": ag.elite,
+            "self_": ag.self_,
+            "team": ag.team,
+        }).to_string());
         let mut bytes = get_ag_bytes(&ag);
         message.append(&mut bytes);
     };
     if let Some(ag) = dst {
         messages |= 1 << 2;
-        log::info!("get_ag_bytes dst skill: {:?} {:?}", ag.id.to_string(), skillname);
+        EVENT_EMITTER.lock().unwrap().emit("arc", json!({
+            "type": "arc",
+            "sub_type": "ag_bytes",
+            "indicator": indicator,
+            "skillname": skillname,
+            "id": id,
+            "revision": revision,
+            "ag_id": ag.id.to_string(),
+            "prof": ag.prof,
+            "elite": ag.elite,
+            "self_": ag.self_,
+            "team": ag.team,
+        }).to_string());
         let mut bytes = get_ag_bytes(&ag);
         message.append(&mut bytes);
     };
