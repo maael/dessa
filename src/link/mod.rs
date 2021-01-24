@@ -4,11 +4,27 @@ pub mod mumble;
 
 use kernel32;
 use winapi_old;
+use serde::{Deserialize, Serialize};
 
 use std::{io, mem, ptr};
 use libc::{c_void, wchar_t};
 
 use self::mumble::*;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GW2Identity {
+	name: String,
+	profession: u16,
+	spec: u16,
+	race: u16,
+	map_id: u16,
+	world_id: u32,
+	team_color_id: u16,
+	commander: bool,
+	map: u16,
+	fov: f32,
+	uisz: u16
+}
 
 pub struct GW2 {
 	last_tick: u32,
