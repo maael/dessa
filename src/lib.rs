@@ -8,6 +8,7 @@ mod executor;
 mod exports;
 mod emitter;
 mod event_emitter;
+mod fractal_level;
 
 #[macro_use]
 extern crate lazy_static;
@@ -20,6 +21,7 @@ fn main() -> LPVOID {
     executor::setup();
     logging::setup();
     websockets::setup(rx);
+    fractal_level::setup();
     mumblelink::setup(tx.clone());
     arcdps::gen_arcdps(tx.clone()) // There is no semi colon here on purpose
 }

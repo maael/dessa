@@ -2,6 +2,7 @@ use crate::link::{GW2, GW2Identity};
 use std::{thread};
 use std::sync::mpsc::{Sender};
 use serde_json::json;
+use crate::emitter::EVENT_EMITTER;
 
 pub fn setup(tx: Sender<String>) {
   thread::spawn(move || {
@@ -14,7 +15,7 @@ pub fn setup(tx: Sender<String>) {
           // Strings don't seem to come out right
           if link.ui_tick() % 100 == 0 {
             let identity: GW2Identity = serde_json::from_str(&link.identity().to_string()).unwrap();
-            tx.send(json!({
+            let json_s = json!({
               "type": "link",
               "ui_version": link.ui_version(),
               "ui_tick": link.ui_tick(),
@@ -51,7 +52,9 @@ pub fn setup(tx: Sender<String>) {
                 "mount_index": link.context().mount_index,
               },
               "description": link.description(),
-            }).to_string()).unwrap();
+            });
+            EVENT_EMITTER.lock().unwrap().emit("link", json_s.to_string());
+            tx.send(json_s.to_string()).unwrap();
             log::debug!("Mumble Link: {:?} {:?} {:?} {:?}", link.ui_tick(), link.name(), link.identity(), link.context().map_id);
           }
       }
