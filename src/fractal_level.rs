@@ -8,6 +8,7 @@ use scrap::{Capturer, Display};
 use std::io::ErrorKind::WouldBlock;
 use std::thread;
 use std::time::Duration;
+use std::collections::HashMap;
 
 static SNAP_WIDTH: u32 = 500;
 static SNAP_HEIGHT: u32 = 200;
@@ -47,6 +48,80 @@ fn scrap_buffer_to_rgbaimage(w: usize, h: usize, buffer: scrap::Frame) -> image:
     image::RgbaImage::from_raw(w as u32, h as u32, bitflipped).unwrap()
 }
 
+#[allow(dead_code)]
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OcrResponseMeta {
+    fractal_level: u8
+}
+
+#[allow(dead_code)]
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OcrResponse {
+    raw: String,
+    lines: Vec<String>,
+    meta: OcrResponseMeta
+}
+
+fn get_ocr (img: String) -> OcrResponse {
+    let client = reqwest::blocking::Client::new();
+    let mut map = HashMap::new();
+    map.insert("img", img);
+    log::info!("[ocr] Start");
+    let res = client.post("https://dessa.mael.tech/api/ocr")
+        .json(&map)
+        .send();
+    match res {
+        Ok(success) => {
+            log::info!("[ocr] Success");
+            match success.text() {
+                Ok(text) => {
+                    log::warn!("[ocr] Text Success: {}", text);
+                    match serde_json::from_str(&text) {
+                        Ok(result) => {
+                            log::warn!("[ocr] JSONParse Success");
+                            let data: OcrResponse = result;
+                            log::info!("data response: {}", data.meta.fractal_level);
+                            return data;
+                        }, 
+                        Err (e) => {
+                            log::warn!("[ocr] JSONParse Error: {}", e);
+                            return OcrResponse {
+                                raw: "".to_string(),
+                                lines: vec![],
+                                meta: OcrResponseMeta {
+                                    fractal_level: 0
+                                }
+                            }
+                        }
+                    }
+                },
+                Err (e) => {
+                    log::warn!("[ocr] Text Error: {}", e);
+                    return OcrResponse {
+                        raw: "".to_string(),
+                        lines: vec![],
+                        meta: OcrResponseMeta {
+                            fractal_level: 0
+                        }
+                    }
+                }
+            }
+        },
+        Err(e) => {
+            log::warn!("[ocr] Error: {}", e);
+            return OcrResponse {
+                raw: "".to_string(),
+                lines: vec![],
+                meta: OcrResponseMeta {
+                    fractal_level: 0
+                }
+            }
+        }
+    }
+}
+
 pub fn setup() {
     thread::spawn(|| {
         let is_first_capture: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
@@ -63,6 +138,11 @@ pub fn setup() {
 
                         let one_second = Duration::new(1, 0);
                         let one_frame = one_second / 60;
+
+                        EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
+                            "type": "fractal",
+                            "msg": "start_fractal",
+                        }).to_string());
 
                         // Sleep one second to hopefully make it more consistent getting the fractal info and not a loading screen
                         thread::sleep(one_second);
@@ -102,11 +182,28 @@ pub fn setup() {
                                 .unwrap();
                             let res_base64 = base64::encode(&buf);
 
-                            log::info!("data:image/png;base64,{}", res_base64);
+                            let full_base64 = format!("data:image/png;base64,{}", res_base64);
+
+                            log::info!("[ocr] Got image");
+
+                            let result = get_ocr(full_base64);
+
+                            EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
+                                "type": "fractal",
+                                "fractal_level": result.meta.fractal_level
+                            }).to_string());
+                            
                             break;
                         }
                     }
                 } else {
+                    let v = *c_is_first_capture.lock().unwrap();
+                    if v == true {
+                        EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
+                            "type": "fractal",
+                            "msg": "end_fractal"
+                        }).to_string());
+                    }
                     *c_is_first_capture.lock().unwrap() = false;
                 }
                 log::info!(

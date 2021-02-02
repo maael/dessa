@@ -35,6 +35,10 @@ git = "https://github.com/greaka/arcdps_bindings"
 version = "0.3.7"
 features = ["ntdef", "minwindef"]
 
+[dependencies.reqwest]
+version = "*"
+features = ["json", "blocking"]
+
 [lib]
 crate-type = ["cdylib"]
 
