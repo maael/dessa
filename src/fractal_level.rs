@@ -53,7 +53,8 @@ fn scrap_buffer_to_rgbaimage(w: usize, h: usize, buffer: scrap::Frame) -> image:
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct OcrResponseMeta {
-    fractal_level: u8
+    fractal_level: u8,
+    personal_fractal_level: u8
 }
 
 #[allow(dead_code)]
@@ -92,7 +93,8 @@ fn get_ocr (img: String) -> OcrResponse {
                                 raw: "".to_string(),
                                 lines: vec![],
                                 meta: OcrResponseMeta {
-                                    fractal_level: 0
+                                    fractal_level: 0,
+                                    personal_fractal_level: 0
                                 }
                             }
                         }
@@ -104,7 +106,8 @@ fn get_ocr (img: String) -> OcrResponse {
                         raw: "".to_string(),
                         lines: vec![],
                         meta: OcrResponseMeta {
-                            fractal_level: 0
+                            fractal_level: 0,
+                            personal_fractal_level: 0
                         }
                     }
                 }
@@ -116,7 +119,8 @@ fn get_ocr (img: String) -> OcrResponse {
                 raw: "".to_string(),
                 lines: vec![],
                 meta: OcrResponseMeta {
-                    fractal_level: 0
+                    fractal_level: 0,
+                    personal_fractal_level: 0
                 }
             }
         }
@@ -193,7 +197,8 @@ pub fn setup() {
                             EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
                                 "type": "fractal",
                                 "sub_type": "fractal_level",
-                                "fractal_level": result.meta.fractal_level
+                                "fractal_level": result.meta.fractal_level,
+                                "personal_fractal_level": result.meta.personal_fractal_level
                             }).to_string());
                             
                             break;
