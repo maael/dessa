@@ -4,6 +4,7 @@ extern crate base64;
 extern crate image;
 extern crate scrap;
 
+use chrono::prelude::*;
 use scrap::{Capturer, Display};
 use std::io::ErrorKind::WouldBlock;
 use std::thread;
@@ -141,7 +142,8 @@ pub fn setup() {
 
                         EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
                             "type": "fractal",
-                            "msg": "start_fractal",
+                            "sub_type": "start_fractal",
+                            "date_time": format!("{}", Utc::now()),
                         }).to_string());
 
                         // Sleep one second to hopefully make it more consistent getting the fractal info and not a loading screen
@@ -190,6 +192,7 @@ pub fn setup() {
 
                             EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
                                 "type": "fractal",
+                                "sub_type": "fractal_level",
                                 "fractal_level": result.meta.fractal_level
                             }).to_string());
                             
@@ -201,7 +204,8 @@ pub fn setup() {
                     if v == true {
                         EVENT_EMITTER.lock().unwrap().emit("arc", serde_json::json!({
                             "type": "fractal",
-                            "msg": "end_fractal"
+                            "sub_type": "end_fractal",
+                            "date_time": format!("{}", Utc::now()),
                         }).to_string());
                     }
                     *c_is_first_capture.lock().unwrap() = false;

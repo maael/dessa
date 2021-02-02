@@ -350,6 +350,7 @@ dependencies = [
  "arcdps_bindings",
  "base64",
  "bincode",
+ "chrono",
  "image",
  "kernel32-sys",
  "lazy_static",

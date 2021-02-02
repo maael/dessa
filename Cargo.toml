@@ -25,6 +25,7 @@ serde = { version = "1.0.114", features = ["derive"] }
 scrap = "*"
 image = "*"
 base64 = "*"
+chrono = "*"
 
 [dependencies.arcdps_bindings]
 version = "0.1.8"
