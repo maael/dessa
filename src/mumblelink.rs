@@ -2,7 +2,19 @@ use crate::link::{GW2, GW2Identity};
 use std::{thread};
 use std::sync::mpsc::{Sender};
 use serde_json::json;
+use serde::{Deserialize, Serialize};
 use crate::emitter::EVENT_EMITTER;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LinkContext {
+  pub map_id: u16
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LinkedMem {
+  pub context: LinkContext,
+  pub identity: GW2Identity
+}
 
 pub fn setup(tx: Sender<String>) {
   thread::spawn(move || {
@@ -55,7 +67,6 @@ pub fn setup(tx: Sender<String>) {
             });
             EVENT_EMITTER.lock().unwrap().emit("link", json_s.to_string());
             tx.send(json_s.to_string()).unwrap();
-            log::debug!("Mumble Link: {:?} {:?} {:?} {:?}", link.ui_tick(), link.name(), link.identity(), link.context().map_id);
           }
       }
   }

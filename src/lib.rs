@@ -9,6 +9,7 @@ mod exports;
 mod emitter;
 mod event_emitter;
 mod fractal_level;
+mod discord_presence;
 
 #[macro_use]
 extern crate lazy_static;
@@ -23,10 +24,12 @@ fn main() -> LPVOID {
     websockets::setup(rx);
     fractal_level::setup();
     mumblelink::setup(tx.clone());
+    discord_presence::setup();
     arcdps::gen_arcdps(tx.clone()) // There is no semi colon here on purpose
 }
 
 fn release() {
     // Release/teardown here
+    discord_presence::teardown();
     executor::teardown();
 }

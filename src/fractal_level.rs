@@ -215,7 +215,7 @@ pub fn setup() {
                     }
                     *c_is_first_capture.lock().unwrap() = false;
                 }
-                log::info!(
+                log::debug!(
                     "Is fractal first capture? {} {}",
                     is_first_capture.lock().unwrap(),
                     data

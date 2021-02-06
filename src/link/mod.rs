@@ -13,17 +13,17 @@ use self::mumble::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GW2Identity {
-	name: String,
-	profession: u16,
-	spec: u16,
-	race: u16,
-	map_id: u16,
-	world_id: u32,
-	team_color_id: u16,
-	commander: bool,
-	map: u16,
-	fov: f32,
-	uisz: u16
+	pub name: String,
+	pub profession: u16,
+	pub spec: u16,
+	pub race: u16,
+	pub map_id: u16,
+	pub world_id: u32,
+	pub team_color_id: u16,
+	pub commander: bool,
+	pub map: u16,
+	pub fov: f32,
+	pub uisz: u16
 }
 
 pub struct GW2 {

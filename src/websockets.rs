@@ -61,7 +61,7 @@ pub fn setup(ws_rx: Receiver<String>) {
     let conn2 = connections.clone();
     EVENT_EMITTER.lock().unwrap().on("arc", move |data: String| {
         let current_conns = conn1.lock().unwrap();
-        log::info!("Sending {} to {} clients", data, current_conns.len());
+        log::debug!("Sending {} to {} clients", data, current_conns.len());
         for client in current_conns.iter() {
             client.send(data.to_string()).unwrap();
         }
@@ -72,7 +72,7 @@ pub fn setup(ws_rx: Receiver<String>) {
             loop {
                 let new_message = ws_rx.recv().unwrap();
                 let current_conns = conn2.lock().unwrap();
-                log::info!("Sending {} to {} clients", new_message, current_conns.len());
+                log::debug!("Sending {} to {} clients", new_message, current_conns.len());
                 for client in current_conns.iter() {
                     client.send(new_message.to_string()).unwrap();
                 }
