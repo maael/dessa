@@ -26,7 +26,8 @@ scrap = "*"
 image = "*"
 base64 = "*"
 chrono = "*"
-rustcord = "0.2.2"
+rustcord = "=0.2.2"
+rustcord-sys = "=0.2.2"
 
 [dependencies.arcdps_bindings]
 version = "0.1.8"
