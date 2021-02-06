@@ -35,11 +35,14 @@ jobs:
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
       - name: Set LIBCLANG_PATH
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+      - uses: davidB/rust-cargo-make@v1
       - name: Run cargo build
         uses: actions-rs/cargo@v1
+        env:
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
         with:
-          command: build
-          args: --release
+          command: make
+          args: --makefile Makefile.toml build-ci
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

@@ -1,0 +1,23 @@
+[tasks.build-release]
+command="cargo"
+env_files = [
+  "./.env"
+]
+args = ["build", "--release"]
+
+[tasks.build-flow]
+env_files = [
+  "./.env"
+]
+dependencies = [
+  "build-release"
+]
+
+[tasks.build-release-ci]
+command="cargo"
+args = ["build", "--release"]
+
+[tasks.build-ci]
+dependencies = [
+  "build-release-ci"
+]

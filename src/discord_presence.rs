@@ -55,12 +55,17 @@ fn get_race_map () -> HashMap<u16, String> {
 pub fn setup() {
   thread::spawn(|| {
     let client = reqwest::blocking::Client::new();
-    let discord = Rustcord::init::<Handlers>("807639399792771093", true, None).unwrap();
+    let discord_client_id = option_env!("DISCORD_CLIENT_ID").unwrap_or("");
+    log::debug!("Client ID: {}", discord_client_id);
+    let discord = Rustcord::init::<Handlers>(discord_client_id, true, None).unwrap();
     let locations_hash: Arc<Mutex<HashMap<u16, String>>> = Arc::new(Mutex::new(HashMap::new()));
     let locations_hash_clone = locations_hash.clone();
     let spec_hash: Arc<Mutex<HashMap<u16, String>>> = Arc::new(Mutex::new(HashMap::new()));
     let spec_hash_clone = spec_hash.clone();
     let init_time = SystemTime::now();
+    
+    // Keeping this here incase we ever want it
+    #[allow(unused_variables)]
     let race_map = get_race_map();
 
     EVENT_EMITTER
@@ -99,10 +104,10 @@ pub fn setup() {
               log::info!("Got spec details for {} as {}", linkmem.identity.spec, spec_name);
               current_spec_hash.insert(linkmem.identity.spec, spec_name);
             }
-            let race_with_spec = vec![ race_map.get(&linkmem.identity.race).unwrap_or(&"".to_owned()).to_string(), current_spec_hash.get(&linkmem.identity.spec).unwrap_or(&"Unknown Profession".to_owned()).to_string()];
+            let race_with_spec = vec![ /*race_map.get(&linkmem.identity.race).unwrap_or(&"".to_owned()).to_string(),*/ current_spec_hash.get(&linkmem.identity.spec).unwrap_or(&"Unknown Profession".to_owned()).to_string()];
             let presence = RichPresenceBuilder::new()
               .details(&format!("{} ({})", linkmem.identity.name, race_with_spec.join(" ")).to_string())
-              .state(&format!("Exploring {}", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"Unknown Location".to_owned())).to_string())
+              .state(&format!("{}", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"Unknown Location".to_owned())).to_string())
               .large_image_key("gw2")
               .large_image_text(&format!("Exploring {}", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"Unknown Location".to_owned())).to_string())
               .small_image_key("gw2")
