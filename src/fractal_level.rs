@@ -34,7 +34,7 @@ static NIGHTMARE_ID: &str = "\"map_id\":1177,";
 static SHATTER_ID: &str = "\"map_id\":1205,";
 static TWILIGHT_ID: &str = "\"map_id\":1267,";
 static DEEPSTONE_ID: &str = "\"map_id\":1290,";
-// TODO: Add Sunqua Peak
+static SUNQUA_ID: &str = "\"map_id\":1384,";
 
 fn scrap_buffer_to_rgbaimage(w: usize, h: usize, buffer: scrap::Frame) -> image::RgbaImage {
     // Flip the ARGB image into a BGRA image.
@@ -135,7 +135,7 @@ pub fn setup() {
             .lock()
             .unwrap()
             .on("link", move |data: String| {
-                if data.contains(UNCATEGORIZED_ID) || data.contains(SNOWBLIND_ID) || data.contains(SWAMPLAND_ID) || data.contains(URBAN_ID) || data.contains(AQUATIC_ID) || data.contains(CLIFFSIDE_ID) || data.contains(UNDERGROUND_ID) || data.contains(VOLCANIC_ID) || data.contains(MOLTEN_ID) || data.contains(AETHERBLADE_ID) || data.contains(THAUMANOVA_ID) || data.contains(SOLID_ID) || data.contains(MOLTEN_ID_2) || data.contains(AETHERBLADE_ID_2) || data.contains(CHAOS_ID) || data.contains(NIGHTMARE_ID) || data.contains(SHATTER_ID) || data.contains(TWILIGHT_ID) || data.contains(DEEPSTONE_ID)
+                if data.contains(UNCATEGORIZED_ID) || data.contains(SNOWBLIND_ID) || data.contains(SWAMPLAND_ID) || data.contains(URBAN_ID) || data.contains(AQUATIC_ID) || data.contains(CLIFFSIDE_ID) || data.contains(UNDERGROUND_ID) || data.contains(VOLCANIC_ID) || data.contains(MOLTEN_ID) || data.contains(AETHERBLADE_ID) || data.contains(THAUMANOVA_ID) || data.contains(SOLID_ID) || data.contains(MOLTEN_ID_2) || data.contains(AETHERBLADE_ID_2) || data.contains(CHAOS_ID) || data.contains(NIGHTMARE_ID) || data.contains(SHATTER_ID) || data.contains(TWILIGHT_ID) || data.contains(DEEPSTONE_ID) || data.contains(SUNQUA_ID)
                  {
                     let v = *c_is_first_capture.lock().unwrap();
                     if v == false {
