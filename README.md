@@ -22,12 +22,13 @@ You need a somewhat recent `rust` version. I didn't check the minimum version. d
 
 1. Install `rustc`. For example via [rustup](https://rustup.rs/).
 2. Install `cargo`. This is not necessary if you used [rustup](https://rustup.rs/).
-3. Build it:
+3. Install `cargo make`.
+4. Build it:
 ```powershell
-cargo build --release
+cargo make --makefile Makefile.toml build-flow
 ```
-4. Copy `target\release\dessa.dll` into your bin64 folder of Guild Wars 2:
-5. Start Gw2
+5. Copy `target\release\dessa.dll` into your bin64 folder of Guild Wars 2:
+6. Start Gw2
 
 ## TODOs
 
