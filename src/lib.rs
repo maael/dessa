@@ -10,6 +10,7 @@ mod emitter;
 mod event_emitter;
 mod fractal_level;
 mod discord_presence;
+mod observatory_agent;
 
 #[macro_use]
 extern crate lazy_static;
@@ -25,6 +26,7 @@ fn main() -> LPVOID {
     fractal_level::setup();
     mumblelink::setup(tx.clone());
     discord_presence::setup();
+    observatory_agent::setup();
     arcdps::gen_arcdps(tx.clone()) // There is no semi colon here on purpose
 }
 

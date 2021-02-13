@@ -168,6 +168,7 @@ fn emit_ag_event (_ev: Option<cbtevent>,
     revision: u64,
     indicator: u8) {
     if let Some(ag) = dst {
+        let name = ag.name.unwrap_or("".to_string());
         EVENT_EMITTER.lock().unwrap().emit("arc", json!({
             "type": "arc",
             "sub_type": "ag_bytes",
@@ -176,15 +177,22 @@ fn emit_ag_event (_ev: Option<cbtevent>,
             "id": id,
             "revision": revision,
             "ag_id": ag.id.to_string(),
-            "ag_name": ag.name.unwrap_or("".to_string()),
+            "ag_name": name,
             "prof": ag.prof,
             "elite": ag.elite,
             "self_": ag.self_,
             "team": ag.team,
             "ag_type": "dst"
         }).to_string());
+        if name.starts_with(":") {
+            EVENT_EMITTER.lock().unwrap().emit("arc", json!({
+                "type": "identity",
+                "name": name
+            }).to_string());
+        }
     }
     if let Some(ag) = src {
+        let name = ag.name.unwrap_or("".to_string());
         EVENT_EMITTER.lock().unwrap().emit("arc", json!({
             "type": "arc",
             "sub_type": "ag_bytes",
@@ -193,13 +201,19 @@ fn emit_ag_event (_ev: Option<cbtevent>,
             "id": id,
             "revision": revision,
             "ag_id": ag.id.to_string(),
-            "ag_name": ag.name.unwrap_or("".to_string()),
+            "ag_name": name,
             "prof": ag.prof,
             "elite": ag.elite,
             "self_": ag.self_,
             "team": ag.team,
             "ag_type": "src"
         }).to_string());
+        if name.starts_with(":") {
+            EVENT_EMITTER.lock().unwrap().emit("arc", json!({
+                "type": "identity",
+                "name": name
+            }).to_string());
+        }
     }
 }
 
@@ -236,37 +250,3 @@ fn get_ev_bytes(ev: &cbtevent) -> Vec<u8> {
         .cloned()
         .collect::<Vec<u8>>()
 }
-
-// fn get_ag_bytes(ag: &AgOwned) -> Vec<u8> {
-//     let (string_length, name_bytes) = if let Some(name) = &ag.name {
-//         let bytes = name.as_bytes();
-//         (bytes.len(), Some(bytes))
-//     } else {
-//         (0, None)
-//     };
-//     log::info!("get_ag_bytes: {:?} {:?}", ag.id.to_string(), ag.name);
-//     if let Some(name_bytes) = name_bytes {
-//         string_length
-//             .to_le_bytes()
-//             .iter()
-//             .chain(name_bytes.iter())
-//             .chain(ag.id.to_le_bytes().iter())
-//             .chain(ag.prof.to_le_bytes().iter())
-//             .chain(ag.elite.to_le_bytes().iter())
-//             .chain(ag.self_.to_le_bytes().iter())
-//             .chain(ag.team.to_le_bytes().iter())
-//             .cloned()
-//             .collect()
-//     } else {
-//         string_length
-//             .to_le_bytes()
-//             .iter()
-//             .chain(ag.id.to_le_bytes().iter())
-//             .chain(ag.prof.to_le_bytes().iter())
-//             .chain(ag.elite.to_le_bytes().iter())
-//             .chain(ag.self_.to_le_bytes().iter())
-//             .chain(ag.team.to_le_bytes().iter())
-//             .cloned()
-//             .collect()
-//     }
-// }

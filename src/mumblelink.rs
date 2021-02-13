@@ -7,7 +7,9 @@ use crate::emitter::EVENT_EMITTER;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LinkContext {
-  pub map_id: u16
+  pub map_id: u16,
+  pub player_x: f32,
+  pub player_y: f32
 }
 
 #[derive(Serialize, Deserialize, Debug)]
