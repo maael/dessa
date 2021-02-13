@@ -57,7 +57,12 @@ pub fn setup() {
     let client = reqwest::blocking::Client::new();
     let discord_client_id = option_env!("DISCORD_CLIENT_ID").unwrap_or("");
     log::debug!("Client ID: {}", discord_client_id);
-    let discord = Rustcord::init::<Handlers>(discord_client_id, true, None).unwrap();
+    let discord = loop {
+      let init_discord = Rustcord::init::<Handlers>(discord_client_id, true, None);
+      if init_discord.is_ok() {
+        break init_discord.unwrap();
+      }
+    };
     let locations_hash: Arc<Mutex<HashMap<u16, String>>> = Arc::new(Mutex::new(HashMap::new()));
     let locations_hash_clone = locations_hash.clone();
     let spec_hash: Arc<Mutex<HashMap<u16, String>>> = Arc::new(Mutex::new(HashMap::new()));
@@ -115,8 +120,10 @@ pub fn setup() {
               .start_time(init_time)
               .build();
     
-            discord.update_presence(presence).unwrap();
-            discord.run_callbacks();
+            match discord.update_presence(presence) {
+              Ok(_) => discord.run_callbacks(),
+              Err(e) => log::debug!("Error updating presence: {}", e)
+            }
           },
           Err(e) => log::error!("Couldn't deserialize json: {}", e)
         };
