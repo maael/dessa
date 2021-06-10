@@ -68,7 +68,7 @@ pub fn setup() {
     let spec_hash: Arc<Mutex<HashMap<u16, String>>> = Arc::new(Mutex::new(HashMap::new()));
     let spec_hash_clone = spec_hash.clone();
     let init_time = SystemTime::now();
-    
+
     // Keeping this here incase we ever want it
     #[allow(unused_variables)]
     let race_map = get_race_map();
@@ -110,16 +110,24 @@ pub fn setup() {
               current_spec_hash.insert(linkmem.identity.spec, spec_name);
             }
             let race_with_spec = vec![ /*race_map.get(&linkmem.identity.race).unwrap_or(&"".to_owned()).to_string(),*/ current_spec_hash.get(&linkmem.identity.spec).unwrap_or(&"Unknown Profession".to_owned()).to_string()];
+
+            let mut large_image_key = format!("{}", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"gw2".to_owned())).to_string();
+            if large_image_key != "gw2" {
+              large_image_key = str::replace(&str::replace(&format!("loading-screen--{}", &large_image_key.to_lowercase()), "'", "_"), " ", "_").to_lowercase();
+            }
+
+            let small_image_key = current_spec_hash.get(&linkmem.identity.spec).unwrap_or(&"gw2".to_owned()).to_string().to_lowercase();
+
             let presence = RichPresenceBuilder::new()
               .details(&format!("{} ({})", linkmem.identity.name, race_with_spec.join(" ")).to_string())
               .state(&format!("{}", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"Unknown Location".to_owned())).to_string())
-              .large_image_key("gw2")
-              .large_image_text(&format!("Exploring {}", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"Unknown Location".to_owned())).to_string())
-              .small_image_key("gw2")
-              .small_image_text("Guild Wars 2")
+              .large_image_key(&large_image_key)
+              .large_image_text(&format!("Exploring {} in Guild Wars 2", current_locations_hash.get(&linkmem.context.map_id).unwrap_or(&"Unknown Location".to_owned())).to_string())
+              .small_image_key(&small_image_key)
+              .small_image_text(&current_spec_hash.get(&linkmem.identity.spec).unwrap_or(&"Unknown Profession".to_owned()).to_string())
               .start_time(init_time)
               .build();
-    
+
             match discord.update_presence(presence) {
               Ok(_) => discord.run_callbacks(),
               Err(e) => log::debug!("Error updating presence: {}", e)
